@@ -64,7 +64,7 @@ def dark_native_cmap():
     return mpl.colors.ListedColormap(colors)
 
 
-# Thanks to Greenleek#0901
+# Thanks to @mayushii.
 def cutstom1_cmap():
     colors = [
         mpl.colors.to_rgba(x)
