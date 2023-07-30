@@ -41,6 +41,24 @@ def cutstom1_cmap():
     ]
     return mpl.colors.ListedColormap(colors)
 
+# Based on https://dev.to/finnhvman/which-colors-look-good-on-black-and-white-2pe6
+def cutstom2_cmap():
+    colors = [
+        mpl.colors.to_rgba(x)
+        for x in [
+            "#3377cc",
+            "#dd3311",
+            "#008800",
+            "#ee0000",
+            "#8855ee",
+            "#aa6600",
+            "#dd1188",
+            "#667788",
+            "#777755",
+        ]
+    ]
+    return mpl.colors.ListedColormap(colors)
+
 
 # based on https://matplotlib.org/stable/gallery/style_sheets/style_sheets_reference.html
 def plot_colored_lines(ax, cmap):
@@ -67,9 +85,7 @@ gradient = np.vstack((gradient, gradient))
 
 def plot_color_gradients(name, cmap, ax):
     ax.imshow(gradient, aspect="auto", cmap=cmap)
-    # ax.text(-0.01, 0.5, name, va='center', ha='right', fontsize=10,
-    #         transform=ax.transAxes)
-    ax.set_ylabel(name, fontsize=10, rotation=0, va="center", ha="right")
+    ax.set_ylabel(name, fontsize=10, rotation=0, va="center", ha="right", color=mpl.colors.to_rgba("#FF5B00"),weight="bold")
 
 
 def plot(style: str, cmap, name) -> None:
@@ -79,16 +95,22 @@ def plot(style: str, cmap, name) -> None:
     plot_colored_lines(axs[0], cmap)
     plot_color_gradients(name, cmap, axs[1])
     for ax in axs:
+        ax.spines[:].set_color(None)
         ax.set_xticks([])
         ax.set_yticks([])
 
 
-def combine(name: str) -> None:
-    images = [Image.open(x) for x in ["white.png", "black.png"]]
+def combine(name: str, include_transparent = True) -> None:
+    name = name.replace('\n', '_')
+    print("save as ", name.replace('\n', '_'))
+    files_list = ["white.png", "black.png"]
+    if include_transparent:
+        files_list.append("transparent.png")
+    images = [Image.open(x) for x in files_list]
     widths, heights = zip(*(i.size for i in images))
     total_width = sum(widths)
     max_height = max(heights)
-    new_im = Image.new("RGB", (total_width, max_height))
+    new_im = Image.new("RGBA", (total_width, max_height))
     x_offset = 0
     for im in images:
         new_im.paste(im, (x_offset, 0))
@@ -100,20 +122,48 @@ def combine(name: str) -> None:
 def try_cmap(cmap, name: str) -> None:
     plot("default", cmap, name)
     plt.savefig("white.png")
+    plt.savefig("transparent.png",transparent=True)
     plot("dark_background", cmap, name)
     plt.savefig("black.png")
     combine(name)
 
 
-def native() -> None:
+def light_native() -> None:
     colors = [mpl.colors.to_rgba(x["color"]) for x in plt.rcParams["axes.prop_cycle"]]
     cmap = mpl.colors.ListedColormap(colors)
-    try_cmap(cmap, "native")
+    try_cmap(cmap, "light\nnative")
+
+def adaptative_native() -> None:
+    colors = [mpl.colors.to_rgba(x["color"]) for x in plt.rcParams["axes.prop_cycle"]]
+    cmap = mpl.colors.ListedColormap(colors)
+    name = "adaptative\nnative"
+    plot("default", cmap, name)
+    plt.savefig("white.png")
+    with plt.style.context("dark_background"):
+        colors = [mpl.colors.to_rgba(x["color"]) for x in plt.rcParams["axes.prop_cycle"]]
+    cmap = mpl.colors.ListedColormap(colors)
+    plot("dark_background", cmap, name)
+    plt.savefig("black.png")
+    combine(name,include_transparent=False)
+
+
+def dark_native() -> None:
+    with plt.style.context("dark_background"):
+        colors = [mpl.colors.to_rgba(x["color"]) for x in plt.rcParams["axes.prop_cycle"]]
+    cmap = mpl.colors.ListedColormap(colors)
+    try_cmap(cmap, "dark\nnative")
 
 
 def cutstom1() -> None:
     try_cmap(cutstom1_cmap(), "custom1")
 
+def cutstom2() -> None:
+    try_cmap(cutstom2_cmap(), "custom2")
+
+def plt_test():
+    fig, ax = plt.subplots()
+    fig.set_edgecolor(mpl.colors.to_rgba("#FF6600"))
+    plt.show()
 
 ########
 # Main #
@@ -121,4 +171,4 @@ def cutstom1() -> None:
 
 if __name__ == "__main__":
     print("#" * 80)
-    cutstom1()
+    light_native()
