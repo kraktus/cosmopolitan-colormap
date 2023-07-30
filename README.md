@@ -1,4 +1,4 @@
-# Cosmopolitan lormap
+# Cosmopolitan colormap
 
 Experiments on matplotlib to find colormaps that render well dark and light backgrounds.
 
