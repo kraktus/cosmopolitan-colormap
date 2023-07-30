@@ -6,7 +6,7 @@ Experiments on matplotlib to find colormaps that render well dark and light back
 
 The different colormaps can be copied from the colormap section of `colormap.py`. Overall, the `light_native_cmap` seem the most pleasant even though it's not the most contrasted palette.
 
-## Comparison
+## Comparisons
 
 We will be comparing the colormaps against the native/default color palette of matplotlib for light and dark backgrounds.
 
