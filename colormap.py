@@ -2,7 +2,7 @@
 # coding: utf-8
 # Licence: GNU AGPLv3
 
-"""Colormap experiments for matplotlib that renders well on both dark and light backgrounds"""
+"""Experiments on matplotlib to find colormaps that render well on dark and light backgrounds"""
 
 from __future__ import annotations
 
@@ -17,6 +17,9 @@ from typing import Optional, List, Union, Tuple
 #############
 # Constants #
 #############
+
+DPI = 100 if __debug__ else 400
+FORMAT = "png"
 
 #############
 # Colormaps #
@@ -61,6 +64,7 @@ def dark_native_cmap():
     return mpl.colors.ListedColormap(colors)
 
 
+# Thanks to Greenleek#0901
 def cutstom1_cmap():
     colors = [
         mpl.colors.to_rgba(x)
@@ -162,28 +166,31 @@ def plot(style: str, cmap, name) -> None:
 def combine(name: str, include_transparent=True) -> None:
     name = name.replace("\n", "_")
     print("save as ", name.replace("\n", "_"))
-    files_list = ["white.png", "black.png"]
+    files_list = [f"white.{FORMAT}", f"black.{FORMAT}"]
     if include_transparent:
-        files_list.append("transparent.png")
+        files_list.append(f"transparent.{FORMAT}")
     images = [Image.open(x) for x in files_list]
+    print([i.size for i in images])
     widths, heights = zip(*(i.size for i in images))
+    print("widths, heights", widths, heights)
     total_width = sum(widths)
     max_height = max(heights)
+    print("total_width max_height",total_width, max_height)
     new_im = Image.new("RGBA", (total_width, max_height))
     x_offset = 0
     for im in images:
         new_im.paste(im, (x_offset, 0))
         x_offset += im.size[0]
 
-    new_im.save(f"{name}.png")
+    new_im.save(f"{name}.{FORMAT}")
 
 
 def try_cmap(cmap, name: str) -> None:
     plot("default", cmap, name)
-    plt.savefig("white.png")
-    plt.savefig("transparent.png", transparent=True)
+    plt.savefig(f"white.{FORMAT}", dpi=DPI)
+    plt.savefig(f"transparent.{FORMAT}", transparent=True, dpi=DPI)
     plot("dark_background", cmap, name)
-    plt.savefig("black.png")
+    plt.savefig(f"black.{FORMAT}", dpi=DPI)
     combine(name)
 
 
@@ -197,14 +204,14 @@ def adaptative_native() -> None:
     cmap = mpl.colors.ListedColormap(colors)
     name = "native"
     plot("default", cmap, name)
-    plt.savefig("white.png")
+    plt.savefig(f"white.{FORMAT}", dpi=DPI)
     with plt.style.context("dark_background"):
         colors = [
             mpl.colors.to_rgba(x["color"]) for x in plt.rcParams["axes.prop_cycle"]
         ]
     cmap = mpl.colors.ListedColormap(colors)
     plot("dark_background", cmap, name)
-    plt.savefig("black.png")
+    plt.savefig(f"black.{FORMAT}", dpi=DPI)
     combine(name, include_transparent=False)
 
 
